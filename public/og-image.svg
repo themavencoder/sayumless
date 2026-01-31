@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fef3c7"/>
+      <stop offset="100%" style="stop-color:#fde68a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="600" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" fill="#1c1917" text-anchor="middle">say<tspan fill="#a3a3a3">um</tspan>less</text>
+  <text x="600" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#57534e" text-anchor="middle">See exactly how you sound when you speak</text>
+  <rect x="500" y="420" width="200" height="50" rx="25" fill="#d97706"/>
+  <text x="600" y="453" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="600" fill="white" text-anchor="middle">Try it free</text>
+</svg>

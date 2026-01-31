@@ -1,0 +1,21 @@
+{
+  "name": "sayumless",
+  "short_name": "sayumless",
+  "description": "See exactly how you sound when you speak. Get your filler word count, speaking pace, and eye contact score.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fef3c7",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

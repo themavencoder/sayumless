@@ -29,6 +29,22 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "sayumless" }],
   manifest: "/manifest.json",
+  metadataBase: new URL("https://sayumless.com"),
+  openGraph: {
+    title: "sayumless - stop saying um",
+    description:
+      "Record yourself speaking and see exactly how you sound. Get your filler word count, speaking pace, and eye contact score.",
+    url: "https://sayumless.com",
+    siteName: "sayumless",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "sayumless - stop saying um",
+    description:
+      "Record yourself speaking and see exactly how you sound. Get your filler word count, speaking pace, and eye contact score.",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
