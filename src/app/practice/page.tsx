@@ -25,7 +25,7 @@ import { computeOverallScore } from "@/types";
 import type { AudioAnalysis, VideoAnalysis, TranscriptWord } from "@/types";
 import { Mic, Square, ChevronDown } from "lucide-react";
 
-type SessionState = "setup" | "recording" | "processing" | "reflecting" | "complete";
+type SessionState = "setup" | "ready" | "recording" | "processing" | "reflecting" | "complete";
 
 const DURATION_OPTIONS = [
   { label: "1 min", value: 60 },
@@ -91,16 +91,31 @@ export default function PracticePage() {
     return () => clearInterval(interval);
   }, [sessionState]);
 
-  const handleStartSession = async () => {
+  const handleGetReady = async () => {
     try {
       setCameraError(null);
+      await recorder.initCamera();
+      setSessionState("ready");
+    } catch (error) {
+      console.error("Failed to access camera:", error);
+      setCameraError("Could not access camera/microphone. Please grant permissions and try again.");
+    }
+  };
+
+  const handleStartRecording = async () => {
+    try {
       await recorder.startRecording();
       timer.start();
       setSessionState("recording");
     } catch (error) {
       console.error("Failed to start recording:", error);
-      setCameraError("Could not access camera/microphone. Please grant permissions and try again.");
+      setCameraError("Recording failed to start. Please try again.");
     }
+  };
+
+  const handleCancelReady = () => {
+    recorder.cancelCamera();
+    setSessionState("setup");
   };
 
   const handleStopSession = async () => {
@@ -344,11 +359,11 @@ export default function PracticePage() {
                   <Button
                     size="lg"
                     className="w-full h-12 text-base"
-                    onClick={handleStartSession}
+                    onClick={handleGetReady}
                     disabled={!topic.trim()}
                   >
                     <Mic className="w-5 h-5" />
-                    Start Recording
+                    Get Ready
                   </Button>
 
                   {cameraError && (
@@ -360,6 +375,59 @@ export default function PracticePage() {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        )}
+
+        {/* ===== READY STATE (camera preview, not yet recording) ===== */}
+        {sessionState === "ready" && (
+          <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-slate-950">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-semibold text-white mb-1">You're all set</h2>
+              <p className="text-sm text-white/50">
+                Check your camera and mic, then hit record when you're ready.
+              </p>
+            </div>
+
+            <div className="w-full max-w-3xl mb-6">
+              <VideoPreview
+                stream={recorder.stream}
+                isRecording={false}
+                className="w-full rounded-2xl"
+                onVideoElement={setVideoElement}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-sm text-white/60">
+                {topic}
+              </span>
+              <span className="px-3 py-1 bg-white/10 border border-white/10 rounded-full text-sm text-white/60">
+                {selectedDuration >= 60 ? `${selectedDuration / 60} min` : `${selectedDuration}s`}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 mt-8">
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={handleCancelReady}
+                className="text-white/60 hover:text-white hover:bg-white/10"
+              >
+                Back
+              </Button>
+              <Button
+                size="lg"
+                onClick={handleStartRecording}
+                className="h-14 px-8 text-base rounded-full bg-[#FF6B6B] hover:bg-[#FF5252] text-white"
+              >
+                <Mic className="w-5 h-5" />
+                Start Recording
+              </Button>
+            </div>
+
+            {recorder.error && (
+              <p className="text-sm text-red-400 mt-4">{recorder.error}</p>
+            )}
           </div>
         )}
 

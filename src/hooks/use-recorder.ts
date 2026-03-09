@@ -7,10 +7,12 @@ interface UseRecorderReturn {
   isPaused: boolean;
   stream: MediaStream | null;
   error: string | null;
+  initCamera: () => Promise<MediaStream>;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<Blob | null>;
   pauseRecording: () => void;
   resumeRecording: () => void;
+  cancelCamera: () => void;
 }
 
 interface UseRecorderOptions {
@@ -29,18 +31,40 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const initCamera = useCallback(async (): Promise<MediaStream> => {
+    try {
+      setError(null);
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: video ? { facingMode: "user", width: 1280, height: 720 } : false,
+        audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
+      });
+      streamRef.current = mediaStream;
+      setStream(mediaStream);
+      return mediaStream;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to access camera/microphone";
+      setError(message);
+      throw err;
+    }
+  }, [video, audio]);
 
   const startRecording = useCallback(async () => {
     try {
       setError(null);
       chunksRef.current = [];
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: video ? { facingMode: "user", width: 1280, height: 720 } : false,
-        audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
-      });
-
-      setStream(mediaStream);
+      // Use existing stream or request a new one
+      let mediaStream = streamRef.current;
+      if (!mediaStream) {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: video ? { facingMode: "user", width: 1280, height: 720 } : false,
+          audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
+        });
+        streamRef.current = mediaStream;
+        setStream(mediaStream);
+      }
 
       const recorder = new MediaRecorder(mediaStream, {
         mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : "video/webm",
@@ -77,7 +101,8 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
 
         // Stop all tracks
-        stream?.getTracks().forEach((track) => track.stop());
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
         setStream(null);
         setIsRecording(false);
         setIsPaused(false);
@@ -88,7 +113,13 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
 
       recorder.stop();
     });
-  }, [stream]);
+  }, []);
+
+  const cancelCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    setStream(null);
+  }, []);
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === "recording") {
@@ -109,9 +140,11 @@ export function useRecorder(options: UseRecorderOptions = {}): UseRecorderReturn
     isPaused,
     stream,
     error,
+    initCamera,
     startRecording,
     stopRecording,
     pauseRecording,
     resumeRecording,
+    cancelCamera,
   };
 }
