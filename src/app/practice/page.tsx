@@ -290,7 +290,7 @@ export default function PracticePage() {
                           onClick={() => setSelectedDuration(option.value)}
                           className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                             selectedDuration === option.value
-                              ? "bg-gradient-to-r from-cyan-600 via-blue-600 to-emerald-500 text-white shadow-lg shadow-cyan-500/20"
+                              ? "bg-[#FF6B6B] text-white shadow-lg shadow-[#FF6B6B]/20"
                               : "bg-muted border border-border text-muted-foreground hover:bg-muted/80"
                           }`}
                         >
@@ -418,7 +418,7 @@ export default function PracticePage() {
                     <div
                       className="absolute inset-0 rounded-full"
                       style={{
-                        background: "conic-gradient(from 0deg, #06b6d4, #3b82f6, #10b981, transparent)",
+                        background: "conic-gradient(from 0deg, #FF6B6B, #FF8E8E, #FF6B6B, transparent)",
                         animation: "gradient-spin 1.2s linear infinite",
                       }}
                     />
