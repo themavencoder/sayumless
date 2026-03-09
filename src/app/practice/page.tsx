@@ -9,6 +9,7 @@ import { TimerDisplay } from "@/components/timer";
 import { VideoPreview } from "@/components/video-preview";
 import { RealTimeOverlay } from "@/components/real-time-overlay";
 import { ModelSelector } from "@/components/model-selector";
+import { CostEstimate } from "@/components/cost-estimate";
 import { GuidedReflection } from "@/components/results/guided-reflection";
 import { SessionSummary } from "@/components/results/session-summary";
 import { ScoreCard } from "@/components/results/score-card";
@@ -60,6 +61,9 @@ export default function PracticePage() {
   const [videoAnalysis, setVideoAnalysis] = useState<VideoAnalysis | null>(null);
   const [words, setWords] = useState<TranscriptWord[]>([]);
   const [seekTimestamp, setSeekTimestamp] = useState<number | undefined>();
+
+  // Reflection preferences (from guided MCQ)
+  const [reflectionPrefs, setReflectionPrefs] = useState<Record<string, string>>({});
 
   // Real-time feedback captures
   const [finalEyeContact, setFinalEyeContact] = useState(0);
@@ -218,7 +222,11 @@ export default function PracticePage() {
   };
 
   const handleReflectionComplete = (responses: { promptId: string; answer: string }[]) => {
-    console.log("Reflection responses:", responses);
+    const prefs: Record<string, string> = {};
+    for (const r of responses) {
+      prefs[r.promptId] = r.answer;
+    }
+    setReflectionPrefs(prefs);
     setSessionState("complete");
   };
 
@@ -235,6 +243,7 @@ export default function PracticePage() {
     setShowAdvanced(false);
     setFinalEyeContact(0);
     setFinalFillerCount(0);
+    setReflectionPrefs({});
     setAudioAnalysis(null);
     setVideoAnalysis(null);
     setWords([]);
@@ -310,16 +319,23 @@ export default function PracticePage() {
                       Advanced options
                     </button>
                     {showAdvanced && (
-                      <div className="grid md:grid-cols-2 gap-4 mt-3 animate-slide-up">
-                        <ModelSelector
-                          type="transcription"
-                          selectedModel={transcriptionModel}
-                          onSelect={setTranscriptionModel}
-                        />
-                        <ModelSelector
-                          type="video"
-                          selectedModel={videoModel}
-                          onSelect={setVideoModel}
+                      <div className="mt-3 space-y-3 animate-slide-up">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <ModelSelector
+                            type="transcription"
+                            selectedModel={transcriptionModel}
+                            onSelect={setTranscriptionModel}
+                          />
+                          <ModelSelector
+                            type="video"
+                            selectedModel={videoModel}
+                            onSelect={setVideoModel}
+                          />
+                        </div>
+                        <CostEstimate
+                          transcriptionModel={transcriptionModel}
+                          videoModel={videoModel}
+                          durationSeconds={selectedDuration}
                         />
                       </div>
                     )}
@@ -438,6 +454,7 @@ export default function PracticePage() {
         {sessionState === "reflecting" && (
           <div className="container mx-auto px-4 py-8">
             <GuidedReflection
+              videoBlob={recordedBlob}
               onComplete={handleReflectionComplete}
               onSkip={handleSkipReflection}
             />
@@ -501,6 +518,7 @@ export default function PracticePage() {
               <Recommendations
                 audioAnalysis={audioAnalysis}
                 videoAnalysis={videoAnalysis}
+                reflectionPrefs={reflectionPrefs}
               />
 
               <div className="flex justify-center gap-4 pt-4">

@@ -77,8 +77,26 @@ export function VideoPlayback({
   }, []);
 
   const handleLoadedMetadata = useCallback(() => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
+    if (!videoRef.current) return;
+    const d = videoRef.current.duration;
+    if (Number.isFinite(d) && d > 0) {
+      setDuration(d);
+    } else {
+      // Blob URLs from MediaRecorder often report Infinity duration.
+      // Workaround: seek to a large time to force the browser to resolve it.
+      videoRef.current.currentTime = Number.MAX_SAFE_INTEGER;
+    }
+  }, []);
+
+  const handleDurationChange = useCallback(() => {
+    if (!videoRef.current) return;
+    const d = videoRef.current.duration;
+    if (Number.isFinite(d) && d > 0) {
+      setDuration(d);
+      // Reset currentTime if it was set to MAX_SAFE_INTEGER for the workaround
+      if (videoRef.current.currentTime > d) {
+        videoRef.current.currentTime = 0;
+      }
     }
   }, []);
 
@@ -110,6 +128,7 @@ export function VideoPlayback({
         className="w-full aspect-video object-cover scale-x-[-1] bg-black"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onDurationChange={handleDurationChange}
         onEnded={() => setIsPlaying(false)}
         playsInline
       />
@@ -134,7 +153,7 @@ export function VideoPlayback({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-2 p-2 bg-white border-t border-border/40">
+      <div className="flex items-center gap-2 p-2 bg-background border-t border-border/40">
         <Button variant="ghost" size="sm" onClick={togglePlay} className="h-8 w-8 p-0">
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </Button>
@@ -162,6 +181,7 @@ export function VideoPlayback({
 }
 
 function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
   const min = Math.floor(seconds / 60);
   const sec = Math.floor(seconds % 60);
   return `${min}:${sec.toString().padStart(2, "0")}`;

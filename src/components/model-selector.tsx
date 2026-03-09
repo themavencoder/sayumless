@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { TRANSCRIPTION_MODELS, VIDEO_MODELS } from "@/lib/models/config";
 import type { ModelInfo, SubscriptionTier } from "@/types";
-import { Lock, Zap, Star } from "lucide-react";
+import { Lock, Zap, Star, Check } from "lucide-react";
 
 interface ModelSelectorProps {
   type: "transcription" | "video";
@@ -28,10 +28,10 @@ export function ModelSelector({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label className="text-sm font-medium text-muted-foreground">
-        {type === "transcription" ? "Transcription Model" : "Video Analysis Model"}
+      <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {type === "transcription" ? "Transcription" : "Video Analysis"}
       </label>
-      <div className="grid gap-2">
+      <div className="space-y-1.5">
         {models.map((model) => {
           const canAccess = tierOrder.indexOf(model.minTier) <= userTierIndex;
           const isSelected = selectedModel === model.id;
@@ -51,36 +51,28 @@ export function ModelSelector({
         <button
           onClick={() => canEnsemble && onSelect("ensemble")}
           className={cn(
-            "flex items-center gap-3 p-3 rounded-lg text-left transition-all border",
+            "flex items-center gap-2.5 w-full p-2.5 rounded-lg text-left transition-all border",
             selectedModel === "ensemble"
-              ? "border-[#FF6B6B]/50 ring-1 ring-[#FF6B6B]/50 bg-[#FFF5F5]"
+              ? "border-[#FF6B6B] bg-[#FF6B6B]/5 ring-1 ring-[#FF6B6B]/30"
               : canEnsemble
-                ? "border-border/60 bg-white hover:bg-slate-50"
-                : "border-border/60 bg-white opacity-60 cursor-not-allowed"
+                ? "border-border/60 bg-background hover:bg-muted/50"
+                : "border-border/40 bg-muted/30 opacity-50 cursor-not-allowed"
           )}
         >
           <div className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+            "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
             selectedModel === "ensemble"
               ? "bg-[#FF6B6B] text-white"
-              : "bg-slate-100"
+              : "bg-muted"
           )}>
-            <Zap className="w-4 h-4" />
+            <Zap className="w-3.5 h-3.5" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">Use All (Ensemble)</span>
-              {!canEnsemble && <Lock className="w-3 h-3 text-muted-foreground" />}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Run all models, combine the best results
-            </p>
+            <span className="text-sm font-medium text-foreground">Ensemble</span>
+            <p className="text-[11px] text-muted-foreground leading-tight">All models combined</p>
           </div>
-          {!canEnsemble && (
-            <span className="text-[10px] font-medium text-muted-foreground bg-slate-100 px-2 py-0.5 rounded">
-              Unlimited
-            </span>
-          )}
+          {!canEnsemble && <Lock className="w-3 h-3 text-muted-foreground shrink-0" />}
+          {selectedModel === "ensemble" && <Check className="w-3.5 h-3.5 text-[#FF6B6B] shrink-0" />}
         </button>
       </div>
     </div>
@@ -102,42 +94,41 @@ function ModelOption({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg text-left transition-all border",
+        "flex items-center gap-2.5 w-full p-2.5 rounded-lg text-left transition-all border",
         isSelected
-          ? "border-[#FF6B6B]/50 ring-1 ring-[#FF6B6B]/50 bg-[#FFF5F5]"
+          ? "border-[#FF6B6B] bg-[#FF6B6B]/5 ring-1 ring-[#FF6B6B]/30"
           : canAccess
-            ? "border-border/60 bg-white hover:bg-slate-50"
-            : "border-border/60 bg-white opacity-60 cursor-not-allowed"
+            ? "border-border/60 bg-background hover:bg-muted/50"
+            : "border-border/40 bg-muted/30 opacity-50 cursor-not-allowed"
       )}
     >
       <div className={cn(
-        "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+        "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
         isSelected
           ? "bg-[#FF6B6B] text-white"
-          : "bg-slate-100"
+          : "bg-muted"
       )}>
-        <Star className="w-4 h-4" />
+        <Star className="w-3.5 h-3.5" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">{model.name}</span>
-          {!canAccess && <Lock className="w-3 h-3 text-muted-foreground" />}
-        </div>
-        <p className="text-xs text-muted-foreground truncate">{model.strengths}</p>
+        <span className="text-sm font-medium text-foreground">{model.name}</span>
+        <p className="text-[11px] text-muted-foreground leading-tight truncate">{model.strengths}</p>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 shrink-0">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
             className={cn(
-              "w-1.5 h-1.5 rounded-full",
+              "w-1 h-1 rounded-full",
               i < model.accuracyRating
-                ? "bg-[#FF6B6B]"
-                : "bg-slate-200"
+                ? isSelected ? "bg-[#FF6B6B]" : "bg-foreground/40"
+                : "bg-border"
             )}
           />
         ))}
       </div>
+      {!canAccess && <Lock className="w-3 h-3 text-muted-foreground shrink-0" />}
+      {isSelected && <Check className="w-3.5 h-3.5 text-[#FF6B6B] shrink-0" />}
     </button>
   );
 }
