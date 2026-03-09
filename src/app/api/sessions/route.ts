@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase";
+import { getAuthUser } from "@/lib/auth";
+import { getSessionUsage } from "@/lib/session-limits";
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check session limits
+    const usage = await getSessionUsage(user);
+    if (!usage.canCreateSession) {
+      return NextResponse.json(
+        { error: `You've used all ${usage.limit} sessions this month. Upgrade your plan for more.` },
+        { status: 403 }
+      );
+    }
+
     const { topic, durationSeconds, modelSelection } = await request.json();
 
     if (!topic || !durationSeconds) {
@@ -14,44 +30,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerSupabaseClient();
 
-    // TODO: Get real user ID from auth (Phase 7)
-    // For now, get or create a placeholder user
-    let userId: string;
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("id")
-      .eq("clerk_id", "anonymous")
-      .single();
-
-    if (existingUser) {
-      userId = existingUser.id;
-    } else {
-      const { data: newUser, error: userError } = await supabase
-        .from("users")
-        .insert({
-          clerk_id: "anonymous",
-          email: "anonymous@sayumless.com",
-          subscription_tier: "free",
-          skill_level: "beginner",
-          credits: 3,
-          total_sessions: 0,
-        })
-        .select("id")
-        .single();
-
-      if (userError || !newUser) {
-        return NextResponse.json(
-          { error: "Failed to create user" },
-          { status: 500 }
-        );
-      }
-      userId = newUser.id;
-    }
-
     const { data: session, error } = await supabase
       .from("sessions")
       .insert({
-        user_id: userId,
+        user_id: user.id,
         topic,
         duration_seconds: durationSeconds,
         status: "recording",
@@ -66,32 +48,37 @@ export async function POST(request: NextRequest) {
 
     if (error || !session) {
       console.error("Session creation error:", error);
-      return NextResponse.json(
-        { error: "Failed to create session" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
     }
+
+    // Increment total_sessions
+    await supabase
+      .from("users")
+      .update({ total_sessions: user.totalSessions + 1 })
+      .eq("id", user.id);
 
     return NextResponse.json({ id: session.id });
   } catch (error) {
     console.error("Sessions route error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createServerSupabaseClient();
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "20");
 
-    // TODO: Filter by authenticated user (Phase 7)
     const { data: sessions, error } = await supabase
       .from("sessions")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(limit);
 

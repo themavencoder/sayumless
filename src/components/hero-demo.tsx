@@ -38,7 +38,6 @@ export function HeroDemo() {
 
   useEffect(() => {
     if (visibleWords >= DEMO_TRANSCRIPT.length) {
-      // Reset after a pause
       const timeout = setTimeout(() => {
         setVisibleWords(0);
         setFillerCount(0);
@@ -59,53 +58,61 @@ export function HeroDemo() {
 
   return (
     <div className="relative">
-      {/* Mock browser window */}
-      <div className="bg-card rounded-xl border shadow-2xl overflow-hidden">
-        {/* Browser chrome */}
-        <div className="bg-muted/50 px-4 py-3 border-b flex items-center gap-2">
+      {/* Clean card */}
+      <div className="bg-card rounded-xl overflow-hidden border border-border shadow-lg">
+        {/* Minimal top bar */}
+        <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center gap-2">
           <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-400" />
-            <div className="w-3 h-3 rounded-full bg-yellow-400" />
-            <div className="w-3 h-3 rounded-full bg-green-400" />
+            <div className="w-2.5 h-2.5 rounded-full bg-foreground/10" />
+            <div className="w-2.5 h-2.5 rounded-full bg-foreground/10" />
+            <div className="w-2.5 h-2.5 rounded-full bg-foreground/10" />
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="bg-background rounded px-3 py-1 text-xs text-muted-foreground">
-              sayumless.com
+            <div className="text-xs text-muted-foreground tracking-wide">
+              Live analysis
             </div>
           </div>
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
         </div>
 
         {/* Content */}
         <div className="p-6 sm:p-8">
-          {/* Stats bar */}
-          <div className="flex items-center justify-between mb-6 pb-4 border-b">
-            <div className="flex items-center gap-6">
-              <div>
-                <div className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">
-                  {fillerCount}
-                </div>
-                <div className="text-xs text-muted-foreground">filler words</div>
+          {/* Stats row */}
+          <div className="flex items-end gap-8 mb-6 pb-5 border-b border-border">
+            <div>
+              <div className="text-4xl sm:text-5xl font-bold tabular-nums tracking-tight">
+                {fillerCount}
               </div>
-              <div>
-                <div className="text-3xl sm:text-4xl font-bold tabular-nums">142</div>
-                <div className="text-xs text-muted-foreground">words/min</div>
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-3xl sm:text-4xl font-bold tabular-nums">73%</div>
-                <div className="text-xs text-muted-foreground">eye contact</div>
+              <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                Fillers
               </div>
             </div>
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+            <div>
+              <div className="text-4xl sm:text-5xl font-bold tabular-nums tracking-tight">
+                142
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                WPM
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <div className="text-4xl sm:text-5xl font-bold tabular-nums tracking-tight">
+                73<span className="text-2xl text-muted-foreground">%</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                Eye contact
+              </div>
+            </div>
           </div>
 
           {/* Transcript */}
           <div className="min-h-[120px]">
-            <p className="text-lg leading-relaxed">
+            <p className="text-base sm:text-lg leading-relaxed text-foreground/80">
               {DEMO_TRANSCRIPT.slice(0, visibleWords).map((item, i) => (
                 <span key={i}>
                   {item.isFiller ? (
                     <span className="relative inline-block">
-                      <span className="bg-primary/20 text-primary font-medium px-1 rounded">
+                      <span className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-medium px-1 rounded text-sm">
                         {item.word}
                       </span>
                     </span>
@@ -115,15 +122,11 @@ export function HeroDemo() {
                   {" "}
                 </span>
               ))}
-              <span className="inline-block w-0.5 h-5 bg-foreground animate-pulse" />
+              <span className="inline-block w-0.5 h-5 bg-foreground/40 animate-pulse" />
             </p>
           </div>
         </div>
       </div>
-
-      {/* Decorative elements */}
-      <div className="absolute -z-10 -top-4 -right-4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute -z-10 -bottom-8 -left-8 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
     </div>
   );
 }

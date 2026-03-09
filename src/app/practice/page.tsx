@@ -17,6 +17,7 @@ import { TranscriptView } from "@/components/results/transcript-view";
 import { VideoPlayback } from "@/components/results/video-playback";
 import { Recommendations } from "@/components/results/recommendations";
 import { Logo } from "@/components/logo";
+import { UserButton } from "@clerk/nextjs";
 import { useTimer } from "@/hooks/use-timer";
 import { useRecorder } from "@/hooks/use-recorder";
 import { useEyeTracking } from "@/hooks/use-eye-tracking";
@@ -45,6 +46,11 @@ export default function PracticePage() {
   const [sessionState, setSessionState] = useState<SessionState>("setup");
   const [topic, setTopic] = useState("");
   const [selectedDuration, setSelectedDuration] = useState(120);
+  const [usage, setUsage] = useState<{ tier: string; used: number; limit: number; remaining: number; canCreateSession: boolean } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/usage").then(r => r.json()).then(d => { if (d.tier) setUsage(d); }).catch(() => {});
+  }, []);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const [showOverlay, setShowOverlay] = useState(true);
@@ -275,6 +281,14 @@ export default function PracticePage() {
         <header className="glass sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Logo />
+            <div className="flex items-center gap-3">
+              {usage && usage.limit !== Infinity && (
+                <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
+                  {usage.remaining} session{usage.remaining !== 1 ? "s" : ""} left
+                </span>
+              )}
+              <UserButton />
+            </div>
           </div>
         </header>
       )}
@@ -360,11 +374,17 @@ export default function PracticePage() {
                     size="lg"
                     className="w-full h-12 text-base"
                     onClick={handleGetReady}
-                    disabled={!topic.trim()}
+                    disabled={!topic.trim() || (usage !== null && !usage.canCreateSession)}
                   >
                     <Mic className="w-5 h-5" />
-                    Get Ready
+                    {usage && !usage.canCreateSession ? "Session Limit Reached" : "Get Ready"}
                   </Button>
+
+                  {usage && !usage.canCreateSession && (
+                    <p className="text-xs text-red-600 text-center">
+                      You&apos;ve used all {usage.limit} free sessions this month. Upgrade for more.
+                    </p>
+                  )}
 
                   {cameraError && (
                     <p className="text-xs text-red-600 text-center">{cameraError}</p>

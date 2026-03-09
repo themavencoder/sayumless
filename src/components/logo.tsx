@@ -14,8 +14,17 @@ export function Logo({ className, size = "md" }: LogoProps) {
   };
 
   return (
-    <Link href="/" className={cn("font-semibold", sizeClasses[size], className)}>
-      say<span className="opacity-40">um</span>less
+    <Link
+      href="/"
+      className={cn(
+        "font-semibold tracking-tight group",
+        sizeClasses[size],
+        className
+      )}
+    >
+      say
+      <span className="logo-dim text-muted-foreground font-normal">[um]</span>
+      less
     </Link>
   );
 }
@@ -28,8 +37,16 @@ export function LogoText({ className, size = "md" }: Omit<LogoProps, "href">) {
   };
 
   return (
-    <span className={cn("font-semibold", sizeClasses[size], className)}>
-      say<span className="opacity-40">um</span>less
+    <span
+      className={cn(
+        "font-semibold tracking-tight",
+        sizeClasses[size],
+        className
+      )}
+    >
+      say
+      <span className="logo-dim text-muted-foreground font-normal">[um]</span>
+      less
     </span>
   );
 }
