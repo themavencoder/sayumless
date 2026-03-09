@@ -11,7 +11,6 @@ import { Play, Pause, ChevronRight } from "lucide-react";
 interface MCQOption {
   id: string;
   label: string;
-  emoji: string;
 }
 
 interface MCQStep {
@@ -29,10 +28,10 @@ const REFLECTION_STEPS: MCQStep[] = [
     question: "What were you practicing for?",
     subtitle: "This helps us tailor your feedback",
     options: [
-      { id: "interview", label: "Job interview", emoji: "💼" },
-      { id: "presentation", label: "Presentation or pitch", emoji: "📊" },
-      { id: "social", label: "Social confidence", emoji: "💬" },
-      { id: "general", label: "Just practicing", emoji: "🎯" },
+      { id: "interview", label: "Job interview" },
+      { id: "presentation", label: "Presentation or pitch" },
+      { id: "social", label: "Social confidence" },
+      { id: "general", label: "Just practicing" },
     ],
   },
   {
@@ -40,10 +39,10 @@ const REFLECTION_STEPS: MCQStep[] = [
     question: "What matters most to you right now?",
     subtitle: "Pick the area you want to improve first",
     options: [
-      { id: "fillers", label: "Reducing filler words", emoji: "🔇" },
-      { id: "confidence", label: "Sounding more confident", emoji: "💪" },
-      { id: "pace", label: "Better pacing & flow", emoji: "⏱️" },
-      { id: "presence", label: "Eye contact & presence", emoji: "👁️" },
+      { id: "fillers", label: "Reducing filler words" },
+      { id: "confidence", label: "Sounding more confident" },
+      { id: "pace", label: "Better pacing & flow" },
+      { id: "presence", label: "Eye contact & presence" },
     ],
   },
   {
@@ -51,19 +50,19 @@ const REFLECTION_STEPS: MCQStep[] = [
     question: "How do you think that went?",
     subtitle: "Be honest — there's no wrong answer",
     options: [
-      { id: "great", label: "Better than expected", emoji: "🌟" },
-      { id: "okay", label: "About what I expected", emoji: "👍" },
-      { id: "rough", label: "Could have been better", emoji: "😅" },
-      { id: "nervous", label: "I was really nervous", emoji: "😰" },
+      { id: "great", label: "Better than expected" },
+      { id: "okay", label: "About what I expected" },
+      { id: "rough", label: "Could have been better" },
+      { id: "nervous", label: "I was really nervous" },
     ],
   },
   {
     id: "depth",
     question: "How detailed do you want your feedback?",
     options: [
-      { id: "quick", label: "Quick highlights only", emoji: "⚡" },
-      { id: "balanced", label: "Key insights + tips", emoji: "📋" },
-      { id: "deep", label: "Deep dive — tell me everything", emoji: "🔬" },
+      { id: "quick", label: "Quick highlights only" },
+      { id: "balanced", label: "Key insights + tips" },
+      { id: "deep", label: "Deep dive — tell me everything" },
     ],
   },
 ];
@@ -174,7 +173,6 @@ export function GuidedReflection({ videoBlob, onComplete, onSkip, className }: G
                         : "border-transparent bg-muted/50 hover:bg-muted hover:border-border/60"
                     )}
                   >
-                    <span className="text-xl shrink-0">{option.emoji}</span>
                     <span className={cn(
                       "text-sm font-medium",
                       isSelected ? "text-foreground" : "text-foreground/80"
